@@ -90,13 +90,12 @@ export default class Timeline extends Component<TimelineProps, State> {
 
     const width = dimensionWidth - LEFT_MARGIN;
     const packedEvents = populateEvents(props.events, width, start);
-    let firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
-    let currentTimePosition = this.calendarHeight * this.getCurrentPercentage();
-    let initPosition = props.scrollToCurrent ? currentTimePosition : firstEventPosition;
-    const verifiedInitPosition = initPosition < 0 ? 0 : initPosition;
+    const currentTimePosition = this.calendarHeight * this.getCurrentPercentage();
+    const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
 
     this.state = {
-      _scrollY: verifiedInitPosition,
+      _scrollY: firstEventPosition < 0 ? 0 : firstEventPosition,
+      _startY: currentTimePosition < 0 ? 0 : currentTimePosition,
       packedEvents
     };
   }
@@ -115,7 +114,7 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   componentDidMount() {
-    this.props.scrollToFirst && this.scrollToFirst();
+    this.props.scrollToCurrent && this.scrollToCurrent();
   }
 
   scrollToFirst() {
@@ -124,6 +123,18 @@ export default class Timeline extends Component<TimelineProps, State> {
         this.scrollView?.current?.scrollTo({
           x: 0,
           y: this.state._scrollY,
+          animated: true
+        });
+      }
+    }, 1);
+  }
+
+  scrollToCurrent() {
+    setTimeout(() => {
+      if (this.state && this.state._startY && this.scrollView) {
+        this.scrollView?.current?.scrollTo({
+          x: 0,
+          y: this.state._startY,
           animated: true
         });
       }
