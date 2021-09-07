@@ -90,7 +90,9 @@ export default class Timeline extends Component<TimelineProps, State> {
 
     const width = dimensionWidth - LEFT_MARGIN;
     const packedEvents = populateEvents(props.events, width, start);
-    let initPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
+    let firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
+    let currentTimePosition = this.calendarHeight * this.getCurrentPercentage();
+    let initPosition = props.scrollToFirst ? currentTimePosition : firstEventPosition;
     const verifiedInitPosition = initPosition < 0 ? 0 : initPosition;
 
     this.state = {
@@ -105,6 +107,7 @@ export default class Timeline extends Component<TimelineProps, State> {
     const {events, start = 0} = this.props;
 
     if (prevEvents !== events || prevStart !== start) {
+      this.props.scrollToFirst && this.scrollToFirst();
       this.setState({
         packedEvents: populateEvents(events, width, start)
       });
@@ -127,11 +130,15 @@ export default class Timeline extends Component<TimelineProps, State> {
     }, 1);
   }
 
-  _renderCurrentMarker() {
+  getCurrentPercentage() {
     const timeNow = new Date();
     const timeStart = new Date(timeNow);
     const difference = (timeNow.getTime() - timeStart.setHours(0, 0, 0, 0)) / 1000 / 60 / 60;
-    const percentage = difference / 24;
+    return difference / 24;
+  }
+
+  _renderCurrentMarker() {
+    const percentage = this.getCurrentPercentage();
     const EVENT_DIFF = 40;
     
     return this.props.renderCurrentMarker ? (
