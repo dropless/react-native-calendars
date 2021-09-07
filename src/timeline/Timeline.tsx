@@ -41,6 +41,9 @@ export interface TimelineProps {
   scrollToFirst?: boolean;
   format24h?: boolean;
   renderEvent?: (event: Event) => JSX.Element;
+  scrollToCurrent?: boolean;
+  showCurrentMarker?: boolean;
+  renderCurrentMarker?: () => JSX.Element;
 }
 
 interface State {
@@ -124,6 +127,24 @@ export default class Timeline extends Component<TimelineProps, State> {
     }, 1);
   }
 
+  _renderCurrentMarker() {
+    const timeNow = new Date();
+    const timeStart = new Date(timeNow);
+    const difference = (timeNow.getTime() - timeStart.setHours(0, 0, 0, 0)) / 1000 / 60 / 60;
+    const percentage = difference / 24;
+    const EVENT_DIFF = 20;
+    
+    return this.props.renderCurrentMarker ? (
+      <View style={{ top: this.calendarHeight * percentage, width: dimensionWidth - EVENT_DIFF }}>
+        {this.props.renderCurrentMarker()}
+      </View>
+    ) : (
+      <View style={{ top: this.calendarHeight * percentage, width: dimensionWidth - EVENT_DIFF }}>
+        <View style={{ height: 2, backgroundColor: 'red', width: '100%' }}></View>
+      </View>
+    )
+  }
+
   _renderLines() {
     const {format24h, start = 0, end = 24} = this.props;
     const offset = this.calendarHeight / (end - start);
@@ -166,7 +187,6 @@ export default class Timeline extends Component<TimelineProps, State> {
       invoke(this.props, 'onEventPress', event);
     }
   }
-
   _renderEvents() {
     const {packedEvents} = this.state;
     let events = packedEvents.map((event: any, i: number) => {
@@ -228,6 +248,7 @@ export default class Timeline extends Component<TimelineProps, State> {
       >
         {this._renderLines()}
         {this._renderEvents()}
+        {this.props.showCurrentMarker && this._renderCurrentMarker()}
       </ScrollView>
     );
   }
