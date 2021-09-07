@@ -132,14 +132,14 @@ export default class Timeline extends Component<TimelineProps, State> {
     const timeStart = new Date(timeNow);
     const difference = (timeNow.getTime() - timeStart.setHours(0, 0, 0, 0)) / 1000 / 60 / 60;
     const percentage = difference / 24;
-    const EVENT_DIFF = 20;
+    const EVENT_DIFF = 40;
     
     return this.props.renderCurrentMarker ? (
-      <View style={{ top: this.calendarHeight * percentage, width: dimensionWidth - EVENT_DIFF }}>
+      <View style={{ top: this.calendarHeight * percentage, width: dimensionWidth }}>
         {this.props.renderCurrentMarker()}
       </View>
     ) : (
-      <View style={{ top: this.calendarHeight * percentage, width: dimensionWidth - EVENT_DIFF }}>
+      <View style={{ top: this.calendarHeight * percentage, left: EVENT_DIFF, width: dimensionWidth - EVENT_DIFF }}>
         <View style={{ height: 2, backgroundColor: 'red', width: '100%' }}></View>
       </View>
     )
