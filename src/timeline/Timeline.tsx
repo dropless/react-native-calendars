@@ -92,7 +92,7 @@ export default class Timeline extends Component<TimelineProps, State> {
     const packedEvents = populateEvents(props.events, width, start);
     let firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
     let currentTimePosition = this.calendarHeight * this.getCurrentPercentage();
-    let initPosition = props.scrollToFirst ? currentTimePosition : firstEventPosition;
+    let initPosition = props.scrollToCurrent ? currentTimePosition : firstEventPosition;
     const verifiedInitPosition = initPosition < 0 ? 0 : initPosition;
 
     this.state = {
