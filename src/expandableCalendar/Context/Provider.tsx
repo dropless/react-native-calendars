@@ -32,6 +32,9 @@ interface Props {
   todayButtonStyle?: ViewStyle;
   /** The opacity for the disabled today button (0-1) */
   disabledOpacity?: number;
+  /** The update source for the calendar */
+  updateSource: UpdateSources;
+
   style?: StyleProp<ViewStyle>;
   theme?: Theme;
 }
@@ -59,8 +62,6 @@ class CalendarProvider extends Component<Props> {
     todayButtonStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
     /** The opacity for the disabled today button (0-1) */
     disabledOpacity: PropTypes.number,
-    /** The update source for the calendar */
-    updateSource: UpdateSources
   };
 
   style = styleConstructor(this.props.theme);
