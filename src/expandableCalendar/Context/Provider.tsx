@@ -10,6 +10,7 @@ import {Theme, UpdateSource, DateData} from '../../types';
 import styleConstructor from '../style';
 import CalendarContext from '.';
 import Presenter from './Presenter';
+import { UpdateSources } from 'expandableCalendar/commons';
 
 
 const commons = require('../commons');
@@ -57,7 +58,9 @@ class CalendarProvider extends Component<Props> {
     /** Today button's style */
     todayButtonStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.number, PropTypes.array]),
     /** The opacity for the disabled today button (0-1) */
-    disabledOpacity: PropTypes.number
+    disabledOpacity: PropTypes.number,
+    /** The update source for the calendar */
+    updateSource: UpdateSources
   };
 
   style = styleConstructor(this.props.theme);
@@ -66,7 +69,7 @@ class CalendarProvider extends Component<Props> {
   state = {
     prevDate: this.props.date || toMarkingFormat(new XDate()),
     date: this.props.date || toMarkingFormat(new XDate()),
-    updateSource: updateSources.CALENDAR_INIT,
+    updateSource: this.props.updateSource || updateSources.CALENDAR_INIT,
     buttonY: new Animated.Value(this.props.todayBottomMargin ? -this.props.todayBottomMargin : -TOP_POSITION),
     buttonIcon: this.presenter.getButtonIcon(this.props.date, this.props.showTodayButton),
     disabled: false,

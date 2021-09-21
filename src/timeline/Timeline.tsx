@@ -126,7 +126,7 @@ export default class Timeline extends Component<TimelineProps, State> {
           animated: true
         });
       }
-    }, 1);
+    }, 100);
   }
 
   scrollToCurrent() {
