@@ -47,7 +47,6 @@ export interface TimelineProps {
 }
 
 interface State {
-  _scrollY: number;
   packedEvents: Event[];
 }
 
@@ -90,12 +89,8 @@ export default class Timeline extends Component<TimelineProps, State> {
 
     const width = dimensionWidth - LEFT_MARGIN;
     const packedEvents = populateEvents(props.events, width, start);
-    const currentTimePosition = this.calendarHeight * this.getCurrentPercentage();
-    const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
 
     this.state = {
-      _scrollY: firstEventPosition < 0 ? 0 : firstEventPosition,
-      _startY: currentTimePosition < 0 ? 0 : currentTimePosition,
       packedEvents
     };
   }
@@ -105,24 +100,28 @@ export default class Timeline extends Component<TimelineProps, State> {
     const {events: prevEvents, start: prevStart = 0} = prevProps;
     const {events, start = 0} = this.props;
 
+    events.length > 0 ? this.scrollToFirst() : this.scrollToCurrent();
+
     if (prevEvents !== events || prevStart !== start) {
-      this.props.scrollToFirst && this.scrollToFirst();
       this.setState({
         packedEvents: populateEvents(events, width, start)
       });
     }
   }
 
-  componentDidMount() {
-    this.props.scrollToCurrent && this.scrollToCurrent();
-  }
-
   scrollToFirst() {
+    const { packedEvents } = this.state; 
+    const { start = 0, end = 0 } = this.props;
+    const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
+    
+    console.log(packedEvents, 'events');
+    console.log(firstEventPosition);
+
     setTimeout(() => {
-      if (this.state && this.state._scrollY && this.scrollView) {
+      if (this.state && firstEventPosition && this.scrollView) {
         this.scrollView?.current?.scrollTo({
           x: 0,
-          y: this.state._scrollY,
+          y: firstEventPosition,
           animated: true
         });
       }
@@ -130,11 +129,13 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   scrollToCurrent() {
+    const currentTimePosition = this.calendarHeight * this.getCurrentPercentage() - 10;
+
     setTimeout(() => {
-      if (this.state && this.state._startY && this.scrollView) {
+      if (this.state && currentTimePosition && this.scrollView) {
         this.scrollView?.current?.scrollTo({
           x: 0,
-          y: this.state._startY,
+          y: currentTimePosition,
           animated: true
         });
       }
