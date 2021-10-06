@@ -110,6 +110,7 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   scrollToFirst() {
+    if (!this.props.scrollToFirst) return;
     const { packedEvents } = this.state; 
     const { start = 0, end = 0 } = this.props;
     const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
@@ -126,6 +127,7 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   scrollToCurrent() {
+    if (!this.props.scrollToCurrent) return;
     const currentTimePosition = this.calendarHeight * this.getCurrentPercentage() - 10;
 
     setTimeout(() => {
