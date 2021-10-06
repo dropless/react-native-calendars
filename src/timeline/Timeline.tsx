@@ -96,16 +96,17 @@ export default class Timeline extends Component<TimelineProps, State> {
     };
   }
 
+  componentDidMount() {
+    const {events, scrollToCurrent, scrollToFirst} = this.props;
+    if (events.length === 0 && scrollToCurrent) this.scrollToCurrent();
+    else if (events.length > 0 && scrollToFirst) this.scrollToFirst();
+  }
+
   componentDidUpdate(prevProps: TimelineProps) {
     const width = dimensionWidth - LEFT_MARGIN;
     const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events, start = 0, scrollToCurrent, scrollToFirst} = this.props;
-    const isToday = events.length > 0 ? new XDate(events[0].start).getDay() === XDate.today().getDay() : false;
+    const {events, start = 0} = this.props;
 
-    if (events.length === 0 && scrollToCurrent) this.scrollToCurrent();
-    else if (events.length > 0 && scrollToCurrent && isToday) this.scrollToCurrent();
-    else if (events.length > 0 && scrollToFirst) this.scrollToFirst();
-    
     if (prevEvents !== events || prevStart !== start) {
       this.setState({
         packedEvents: populateEvents(events, width, start)
