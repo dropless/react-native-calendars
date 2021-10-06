@@ -11,6 +11,7 @@ import {View, Text, TouchableOpacity, Dimensions, ScrollView, TextStyle, ViewSty
 import {Theme} from '../types';
 import styleConstructor from './style';
 import populateEvents from './Packer';
+import { throws } from 'assert';
 
 
 const LEFT_MARGIN = 60 - 1;
@@ -98,10 +99,13 @@ export default class Timeline extends Component<TimelineProps, State> {
   componentDidUpdate(prevProps: TimelineProps) {
     const width = dimensionWidth - LEFT_MARGIN;
     const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events, start = 0} = this.props;
+    const {events, start = 0, scrollToCurrent, scrollToFirst} = this.props;
+    const isToday = events.length > 0 ? new XDate(events[0].start).getDay() === XDate.today().getDay() : false;
 
-    events.length > 0 ? this.scrollToFirst() : this.scrollToCurrent();
-
+    if (events.length === 0 && scrollToCurrent) this.scrollToCurrent();
+    else if (events.length > 0 && scrollToCurrent && isToday) this.scrollToCurrent();
+    else if (events.length > 0 && scrollToFirst) this.scrollToFirst();
+    
     if (prevEvents !== events || prevStart !== start) {
       this.setState({
         packedEvents: populateEvents(events, width, start)
@@ -110,7 +114,6 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   scrollToFirst() {
-    if (!this.props.scrollToFirst) return;
     const { packedEvents } = this.state; 
     const { start = 0, end = 0 } = this.props;
     const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
@@ -127,7 +130,6 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   scrollToCurrent() {
-    if (!this.props.scrollToCurrent) return;
     const currentTimePosition = this.calendarHeight * this.getCurrentPercentage() - 10;
 
     setTimeout(() => {
