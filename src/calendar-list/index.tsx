@@ -349,10 +349,10 @@ class CalendarList extends Component<Props, State> {
     const {style, pastScrollRange, futureScrollRange, horizontal, showScrollIndicator} = this.props;
 
     return (
-      <View style={[this.style.flatListContainer, { opacity: this.props.canOpen ? 1 : 0 }]}>
+      <View style={this.style.flatListContainer}>
         <FlatList
           ref={this.list}
-          style={[this.style.container, style]}
+          style={[this.style.container, style, { opacity: this.props.canOpen ? 1 : 0 }]}
           // @ts-ignore
           initialListSize={pastScrollRange + futureScrollRange + 1} // ListView deprecated
           data={this.state.rows}
