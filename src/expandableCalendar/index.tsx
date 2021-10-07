@@ -62,6 +62,9 @@ export interface Props extends CalendarListProps {
   openThreshold?: number;
   /** a threshold for closing the calendar with the pan gesture */
   closeThreshold?: number;
+  /** a boolean to say if calendar can be opened */
+  canOpen?: boolean;
+
   context?: any;
 }
 export type ExpandableCalendarProps = Props;
@@ -104,7 +107,9 @@ class ExpandableCalendar extends Component<Props, State> {
     /** a threshold for opening the calendar with the pan gesture */
     openThreshold: PropTypes.number,
     /** a threshold for closing the calendar with the pan gesture */
-    closeThreshold: PropTypes.number
+    closeThreshold: PropTypes.number,
+    /** a boolean to say if calendar can be opened */
+    canOpen: PropTypes.bool
   };
 
   static defaultProps = {
@@ -115,7 +120,8 @@ class ExpandableCalendar extends Component<Props, State> {
     rightArrowImageSource: RIGHT_ARROW,
     allowShadow: true,
     openThreshold: PAN_GESTURE_THRESHOLD,
-    closeThreshold: PAN_GESTURE_THRESHOLD
+    closeThreshold: PAN_GESTURE_THRESHOLD,
+    canOpen: true
   };
 
   static positions = Positions;
@@ -301,6 +307,8 @@ class ExpandableCalendar extends Component<Props, State> {
   /** Pan Gesture */
 
   handleMoveShouldSetPanResponder = (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+    if (!this.props.canOpen) return;
+    
     if (this.props.disablePan) {
       return false;
     }
