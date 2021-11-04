@@ -27,11 +27,12 @@ export type Event = {
   start: string;
   end: string;
   title: string;
-  summary: string;
+  summary?: string;
   color?: string;
 };
 
 export interface TimelineProps {
+  backgroundEvents?: Event[];
   events: Event[];
   start?: number;
   end?: number;
@@ -48,6 +49,7 @@ export interface TimelineProps {
 }
 
 interface State {
+  packedBackgroundEvents: Event[];
   packedEvents: Event[];
 }
 
@@ -58,6 +60,15 @@ export default class Timeline extends Component<TimelineProps, State> {
     eventTapped: PropTypes.func, // TODO: remove after deprecation
     onEventPress: PropTypes.func,
     format24h: PropTypes.bool,
+    backgroundEvents: PropTypes.arrayOf(
+      PropTypes.shape({
+        start: PropTypes.string.isRequired,
+        end: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+        summary: PropTypes.string.isRequired,
+        color: PropTypes.string
+      })
+    ),
     events: PropTypes.arrayOf(
       PropTypes.shape({
         start: PropTypes.string.isRequired,
@@ -89,9 +100,11 @@ export default class Timeline extends Component<TimelineProps, State> {
     this.style = styleConstructor(props.theme || props.styles, this.calendarHeight);
 
     const width = dimensionWidth - LEFT_MARGIN;
+    const packedBackgroundEvents = populateEvents(props.backgroundEvents ?? [], width, start);
     const packedEvents = populateEvents(props.events, width, start);
 
     this.state = {
+      packedBackgroundEvents,
       packedEvents
     };
   }
@@ -144,6 +157,7 @@ export default class Timeline extends Component<TimelineProps, State> {
     }, 1);
   }
 
+  
   getCurrentPercentage() {
     const timeNow = new Date();
     const timeStart = new Date(timeNow);
@@ -151,17 +165,12 @@ export default class Timeline extends Component<TimelineProps, State> {
     return difference / 24;
   }
 
-  _renderCurrentMarker() {
-    const percentage = this.getCurrentPercentage();
-    const EVENT_DIFF = 40;
-    
-    return (
-      <View style={{ top: this.calendarHeight * percentage, left: EVENT_DIFF, width: dimensionWidth - EVENT_DIFF }}>
-        {this.props.renderCurrentMarker ? this.props.renderCurrentMarker() : (
-          <View style={{ height: 2, backgroundColor: 'red', width: '100%' }}></View>
-        )}
-      </View>
-    );
+  _onEventPress(event: Event) {
+    if (this.props.eventTapped) { //TODO: remove after deprecation
+      this.props.eventTapped(event);
+    } else {
+      invoke(this.props, 'onEventPress', event);
+    }
   }
 
   _renderLines() {
@@ -199,13 +208,48 @@ export default class Timeline extends Component<TimelineProps, State> {
     });
   }
 
-  _onEventPress(event: Event) {
-    if (this.props.eventTapped) { //TODO: remove after deprecation
-      this.props.eventTapped(event);
-    } else {
-      invoke(this.props, 'onEventPress', event);
-    }
+  _renderBackgroundEvents() {
+    const {packedBackgroundEvents} = this.state;
+    let events = packedBackgroundEvents.map((event: any, i: number) => {
+      const style = {
+        left: event.left - 5,
+        height: event.height,
+        width: event.width + 10,
+        top: event.top,
+        backgroundColor: 'rgba(0,0,0,0.075)',
+        borderWidth: 0,
+      };
+
+      const textStyle: TextStyle = { 
+        color: '#6a6d76',
+        fontWeight: "500",
+      };
+
+      console.log(event);
+
+      return (
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => this._onEventPress(this.props.events[event.index])}
+          key={i}
+          style={[this.style.event, style]}
+        >
+            <View style={{ padding: 8}}>
+              <Text numberOfLines={1} style={[this.style.eventTitle, textStyle]}>
+                {event.title || 'Event'}
+              </Text>
+            </View>
+        </TouchableOpacity>
+      );
+    });
+
+    return (
+      <View>
+        <View style={{marginLeft: LEFT_MARGIN}}>{events}</View>
+      </View>
+    );
   }
+
   _renderEvents() {
     const {packedEvents} = this.state;
     let events = packedEvents.map((event: any, i: number) => {
@@ -259,6 +303,19 @@ export default class Timeline extends Component<TimelineProps, State> {
     );
   }
 
+  _renderCurrentMarker() {
+    const percentage = this.getCurrentPercentage();
+    const EVENT_DIFF = 40;
+    
+    return (
+      <View style={{ top: this.calendarHeight * percentage, left: EVENT_DIFF, width: dimensionWidth - EVENT_DIFF }}>
+        {this.props.renderCurrentMarker ? this.props.renderCurrentMarker() : (
+          <View style={{ height: 2, backgroundColor: 'red', width: '100%' }}></View>
+        )}
+      </View>
+    );
+  }
+
   render() {
     return (
       <ScrollView
@@ -267,6 +324,7 @@ export default class Timeline extends Component<TimelineProps, State> {
         nestedScrollEnabled
       >
         {this._renderLines()}
+        {this._renderBackgroundEvents()}
         {this._renderEvents()}
         {this.props.showCurrentMarker && this._renderCurrentMarker()}
       </ScrollView>
