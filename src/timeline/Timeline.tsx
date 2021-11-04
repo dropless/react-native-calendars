@@ -264,6 +264,7 @@ export default class Timeline extends Component<TimelineProps, State> {
       <ScrollView
         ref={this.scrollView}
         contentContainerStyle={[this.style.contentStyle, {width: dimensionWidth}]}
+        nestedScrollEnabled
       >
         {this._renderLines()}
         {this._renderEvents()}
