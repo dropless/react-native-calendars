@@ -1,4 +1,8 @@
-# React Native Calendars 🗓️ 📆
+# rn-dropless-calendars is a fork of React Native Calendars 🗓️ 📆
+https://github.com/wix/react-native-calendars
+
+The modifications made in this fork are intended only to enhance the existing work to meet custom requirements. 
+
 [![Version](https://img.shields.io/npm/v/react-native-calendars.svg)](https://www.npmjs.com/package/react-native-calendars)
 [![Build Status](https://travis-ci.org/wix/react-native-calendars.svg?branch=master)](https://travis-ci.org/wix/react-native-calendars)
 
