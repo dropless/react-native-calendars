@@ -118,10 +118,11 @@ export default class Timeline extends Component<TimelineProps, State> {
   componentDidUpdate(prevProps: TimelineProps) {
     const width = dimensionWidth - LEFT_MARGIN;
     const {events: prevEvents, start: prevStart = 0} = prevProps;
-    const {events, start = 0} = this.props;
+    const {events, backgroundEvents, start = 0} = this.props;
 
     if (prevEvents !== events || prevStart !== start) {
       this.setState({
+        packedBackgroundEvents: populateEvents(backgroundEvents ?? [], width, start), 
         packedEvents: populateEvents(events, width, start)
       });
     }
@@ -224,8 +225,6 @@ export default class Timeline extends Component<TimelineProps, State> {
         color: '#6a6d76',
         fontWeight: "500",
       };
-
-      console.log(event);
 
       return (
         <TouchableOpacity
