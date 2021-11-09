@@ -117,10 +117,10 @@ export default class Timeline extends Component<TimelineProps, State> {
 
   componentDidUpdate(prevProps: TimelineProps) {
     const width = dimensionWidth - LEFT_MARGIN;
-    const {events: prevEvents, start: prevStart = 0} = prevProps;
+    const {events: prevEvents, backgroundEvents: prevBackgroundEvents, start: prevStart = 0} = prevProps;
     const {events, backgroundEvents, start = 0} = this.props;
 
-    if (prevEvents !== events || prevStart !== start) {
+    if (prevEvents !== events || prevBackgroundEvents !== backgroundEvents || prevStart !== start) {
       this.setState({
         packedBackgroundEvents: populateEvents(backgroundEvents ?? [], width, start), 
         packedEvents: populateEvents(events, width, start)
