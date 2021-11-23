@@ -11,7 +11,6 @@ import {View, Text, TouchableOpacity, Dimensions, ScrollView, TextStyle, ViewSty
 import {Theme} from '../types';
 import styleConstructor from './style';
 import populateEvents from './Packer';
-import { throws } from 'assert';
 
 
 const LEFT_MARGIN = 60 - 1;
@@ -32,6 +31,7 @@ export type Event = {
 };
 
 export interface TimelineProps {
+  workingHours?: Event[];
   backgroundEvents?: Event[];
   events: Event[];
   start?: number;
@@ -49,6 +49,7 @@ export interface TimelineProps {
 }
 
 interface State {
+  packedWorkingHours: Event[];
   packedBackgroundEvents: Event[];
   packedEvents: Event[];
 }
@@ -60,13 +61,18 @@ export default class Timeline extends Component<TimelineProps, State> {
     eventTapped: PropTypes.func, // TODO: remove after deprecation
     onEventPress: PropTypes.func,
     format24h: PropTypes.bool,
+    workingHours: PropTypes.arrayOf(
+      PropTypes.shape({
+        start: PropTypes.string.isRequired,
+        end: PropTypes.string.isRequired,
+        title: PropTypes.string.isRequired,
+      })
+    ),
     backgroundEvents: PropTypes.arrayOf(
       PropTypes.shape({
         start: PropTypes.string.isRequired,
         end: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
-        summary: PropTypes.string.isRequired,
-        color: PropTypes.string
       })
     ),
     events: PropTypes.arrayOf(
@@ -100,10 +106,12 @@ export default class Timeline extends Component<TimelineProps, State> {
     this.style = styleConstructor(props.theme || props.styles, this.calendarHeight);
 
     const width = dimensionWidth - LEFT_MARGIN;
+    const packedWorkingHours = populateEvents(props.workingHours ?? [], width, start);
     const packedBackgroundEvents = populateEvents(props.backgroundEvents ?? [], width, start);
     const packedEvents = populateEvents(props.events, width, start);
 
     this.state = {
+      packedWorkingHours,
       packedBackgroundEvents,
       packedEvents
     };
@@ -117,11 +125,17 @@ export default class Timeline extends Component<TimelineProps, State> {
 
   componentDidUpdate(prevProps: TimelineProps) {
     const width = dimensionWidth - LEFT_MARGIN;
-    const {events: prevEvents, backgroundEvents: prevBackgroundEvents, start: prevStart = 0} = prevProps;
-    const {events, backgroundEvents, start = 0} = this.props;
+    const {events: prevEvents, backgroundEvents: prevBackgroundEvents, workingHours: prevWorkingHours, start: prevStart = 0} = prevProps;
+    const {events, backgroundEvents, workingHours, start = 0} = this.props;
 
-    if (prevEvents !== events || prevBackgroundEvents !== backgroundEvents || prevStart !== start) {
+    const eventsChanged = prevEvents !== events;
+    const backgroundEventsChanged = prevBackgroundEvents !== backgroundEvents;
+    const workingHoursChanged = prevWorkingHours !== workingHours;
+    const startChanged = prevStart !== start;
+
+    if (eventsChanged || backgroundEventsChanged || workingHoursChanged || startChanged) {
       this.setState({
+        packedWorkingHours: populateEvents(workingHours ?? [], width, start),
         packedBackgroundEvents: populateEvents(backgroundEvents ?? [], width, start), 
         packedEvents: populateEvents(events, width, start)
       });
@@ -174,6 +188,30 @@ export default class Timeline extends Component<TimelineProps, State> {
     }
   }
 
+
+  _renderWorkingHours() {
+    const {packedWorkingHours} = this.state;
+    let events = packedWorkingHours.map((event: any, i: number) => {
+      const style = {
+        left: event.left,
+        height: event.height,
+        width: event.width + LEFT_MARGIN + 20,
+        top: event.top,
+        backgroundColor: 'rgba(0,0,0,0.03)',
+      };
+
+      return <View key={i} style={[this.style.event, style]} />;
+    });
+
+    return (
+      <View>
+        <View>
+          {events}
+        </View>
+      </View>
+    );
+  }
+
   _renderLines() {
     const {format24h, start = 0, end = 24} = this.props;
     const offset = this.calendarHeight / (end - start);
@@ -210,35 +248,55 @@ export default class Timeline extends Component<TimelineProps, State> {
   }
 
   _renderBackgroundEvents() {
+    const {start = 0, end = 24} = this.props;
     const {packedBackgroundEvents} = this.state;
+    const offset = this.calendarHeight / (end - start);
+    
     let events = packedBackgroundEvents.map((event: any, i: number) => {
-      const style = {
+      const intervals = Math.ceil(event.height / offset);
+      const style: ViewStyle = {
         left: event.left - 5,
         height: event.height,
         width: event.width + 10,
         top: event.top,
         backgroundColor: 'rgba(0,0,0,0.075)',
         borderWidth: 0,
+        overflow: 'hidden',
       };
 
       const textStyle: TextStyle = { 
+        position: 'absolute',
+        left: 10,
+        marginTop: 10,
         color: '#6a6d76',
         fontWeight: "500",
       };
 
       return (
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => this._onEventPress(this.props.events[event.index])}
-          key={i}
-          style={[this.style.event, style]}
-        >
+        <View key={i} style={[this.style.event, style]}>
             <View style={{ padding: 8}}>
-              <Text numberOfLines={1} style={[this.style.eventTitle, textStyle]}>
-                {event.title || 'Event'}
-              </Text>
+              {/* {new Array(intervals).fill(undefined).map((interval, i) => {
+                const textStyle: TextStyle = { 
+                  position: 'absolute',
+                  left: 10,
+                  marginTop: 10,
+                  color: '#6a6d76',
+                  fontWeight: "500",
+                  top: offset * i,
+                  opacity: 0.3,
+                };
+
+                return (
+                  <Text key={i} numberOfLines={1} style={[this.style.eventTitle, textStyle]}>
+                    {event.title || 'Event'}
+                  </Text>
+                  );
+                })} */}
+                <Text key={i} numberOfLines={1} style={[this.style.eventTitle, textStyle]}>
+                  {event.title || 'Event'}
+                </Text>
             </View>
-        </TouchableOpacity>
+        </View>
       );
     });
 
@@ -322,6 +380,7 @@ export default class Timeline extends Component<TimelineProps, State> {
         contentContainerStyle={[this.style.contentStyle, {width: dimensionWidth}]}
         nestedScrollEnabled
       >
+        {this._renderWorkingHours()}
         {this._renderLines()}
         {this._renderBackgroundEvents()}
         {this._renderEvents()}
