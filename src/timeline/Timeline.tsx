@@ -324,13 +324,15 @@ export default class Timeline extends Component<TimelineProps, State> {
       // However it would make sense to overflow the title to a new line if needed
       const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
       const formatTime = this.props.format24h ? 'HH:mm' : 'hh:mm A';
+      const current = this.props.events[event.index] ?? null;
+      const disabled = current != null ? current.disabled : false;
 
       return (
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => this._onEventPress(this.props.events[event.index])}
+          onPress={() => this._onEventPress(current)}
           key={i}
-          disabled={this.props.events[event.index].disabled ?? false}
+          disabled={disabled}
           style={[this.style.event, style]}
         >
           {this.props.renderEvent ? (
