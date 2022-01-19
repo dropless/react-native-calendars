@@ -151,7 +151,7 @@ export default class Timeline extends Component<TimelineProps, State> {
   scrollToFirst() {
     const {packedEvents} = this.state;
     const {start = 0, end = 0} = this.props;
-    const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start);
+    const firstEventPosition = min(map(packedEvents, 'top')) - this.calendarHeight / (end - start) + 60;
 
     setTimeout(() => {
       if (this.state && firstEventPosition && this.scrollView) {
