@@ -337,9 +337,11 @@ export default class Timeline extends Component<TimelineProps, State> {
           style={[this.style.event, style]}
         >
           {this.props.renderEvent ? (
-            this.props.renderEvent(event)
+            <AView animation="fadeIn" delay={i * 100 + 400}>
+              {this.props.renderEvent(event)}
+            </AView>
           ) : (
-            <AView animation="fadeIn" delay={500}>
+            <AView animation="fadeIn" delay={i * 100 + 400}>
               <Text numberOfLines={1} style={this.style.eventTitle}>
                 {event.title || 'Event'}
               </Text>
