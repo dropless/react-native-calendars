@@ -7,6 +7,7 @@ import XDate from 'xdate';
 
 import React, {Component} from 'react';
 import {View, Text, TouchableOpacity, Dimensions, ScrollView, TextStyle, ViewStyle} from 'react-native';
+import {View as AView} from 'react-native-animatable';
 
 import {Theme} from '../types';
 import styleConstructor from './style';
@@ -275,7 +276,7 @@ export default class Timeline extends Component<TimelineProps, State> {
       };
 
       return (
-        <View key={i} style={[this.style.event, style]}>
+        <AView key={i} style={[this.style.event, style]} animation="fadeIn">
           <View style={{padding: 8}}>
             {/* {new Array(intervals).fill(undefined).map((interval, i) => {
                 const textStyle: TextStyle = { 
@@ -298,7 +299,7 @@ export default class Timeline extends Component<TimelineProps, State> {
               {event.title || 'Event'}
             </Text>
           </View>
-        </View>
+        </AView>
       );
     });
 
@@ -338,7 +339,7 @@ export default class Timeline extends Component<TimelineProps, State> {
           {this.props.renderEvent ? (
             this.props.renderEvent(event)
           ) : (
-            <View>
+            <AView animation="fadeIn" delay={500}>
               <Text numberOfLines={1} style={this.style.eventTitle}>
                 {event.title || 'Event'}
               </Text>
@@ -352,7 +353,7 @@ export default class Timeline extends Component<TimelineProps, State> {
                   {new XDate(event.start).toString(formatTime)} - {new XDate(event.end).toString(formatTime)}
                 </Text>
               ) : null}
-            </View>
+            </AView>
           )}
         </TouchableOpacity>
       );
