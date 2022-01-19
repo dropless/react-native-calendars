@@ -317,7 +317,7 @@ export default class Timeline extends Component<TimelineProps, State> {
         height: event.height,
         width: event.width,
         top: event.top,
-        backgroundColor: event.color ? event.color : '#add8e6'
+        backgroundColor: event.color ? event.color : 'transparent'
       };
 
       // Fixing the number of lines for the event title makes this calculation easier.
